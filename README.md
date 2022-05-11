@@ -4,4 +4,4 @@ Install Dependencies:
 pip install pyzmq jsonschema matplotlib numpy
 
 Run program:
-py server.py
+py server.py [PORT]
