@@ -8,6 +8,8 @@ if __name__ == '__main__':
     if len(sys.argv) > 1:
         # the port that the server will run on
         PORT = sys.argv[1]
+    else:
+        PORT = 6000
 
     # set up a socket connection on localhost:PORT
     context = zmq.Context().instance()
