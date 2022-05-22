@@ -3,14 +3,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-def autoPct(values):
-    def customPct(pct):
-        total = sum(values)
-        val = int(round(pct*total/100.0))
-        return '{p:.0f}%  (${v:d})'.format(p=pct, v=val)
-    return customPct
-
-
 def createExpenseReport(jsonObj):
     filepath = os.path.abspath(os.getcwd())
     expenseCatNames = []
@@ -43,20 +35,35 @@ def createExpenseReport(jsonObj):
         for transaction in tempDict[category]:
             # check if the amount should be a debit or credit
             if jsonObj["transactions"][int(transaction) - 1]["debit"] == category:
-                amount += int(jsonObj["transactions"][int(transaction) - 1]["amount"])
-            else:
                 amount += -int(jsonObj["transactions"][int(transaction) - 1]["amount"])
+            else:
+                amount += int(jsonObj["transactions"][int(transaction) - 1]["amount"])
         expenseAmounts.append(amount)
 
     if not expenseAmounts:
         return "No expenses to report"
 
+    # generate legend/percent labels
+    legendLabels = []
+    percentLabels = []
+    total = sum(expenseAmounts)
+    for idx in range(len(expenseCatNames)):
+        current = expenseCatNames[idx] + " ($" + str(expenseAmounts[idx]) + ")"
+        legendLabels.append(current)
+        percentLabels.append(str(round((expenseAmounts[idx] / total) * 100)) + "%")
+
     # create and save the pie chart
     expenseAmounts = np.array(expenseAmounts)
-    plt.pie(expenseAmounts, labels=expenseCatNames, autopct=autoPct(expenseAmounts))
-    plt.title("Expense Summary")
+    fig = plt.figure(figsize=(4, 5))
+    ax = fig.add_subplot(211)
+    ax.set_title('Expense Report')
+    ax.axis("equal")
+    pie = ax.pie(expenseAmounts, labels=percentLabels, textprops={'fontsize': 6})
+    ax2 = fig.add_subplot(212)
+    ax2.axis("off")
+    ax2.legend(pie[0], legendLabels, loc="center", prop={'size': 8})
     filename = "expense_report.pdf"
-    plt.savefig(filename)
+    plt.savefig(filename, bbox_inches="tight")
 
     return filepath + "\\" + filename
 
